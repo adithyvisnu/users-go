@@ -8,9 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/yourorg/users-api/internal/middleware"
-	"github.com/yourorg/users-api/internal/models"
-	"github.com/yourorg/users-api/internal/service"
+	"github.com/adithyvisnu/user-go/internal/middleware"
+	"github.com/adithyvisnu/user-go/internal/models"
+	"github.com/adithyvisnu/user-go/internal/service"
+
 )
 
 // UserHandler handles HTTP requests for user operations.

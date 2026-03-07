@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"github.com/yourorg/users-api/internal/cache"
-	"github.com/yourorg/users-api/internal/models"
+	"github.com/adithyvisnu/user-go/internal/cache"
+	"github.com/adithyvisnu/user-go/internal/models"
 )
 
 // UserRepository handles all persistence for users.

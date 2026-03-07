@@ -36,9 +36,12 @@ users-api/
 make install-tools
 ```
 
-### 2. Run with Docker Compose
+### 2. Run with Podman
 
 ```bash
+# Install podman-compose if you don't have it
+pip install podman-compose
+
 make docker-up
 # API: http://localhost:8080
 # Swagger UI: http://localhost:8080/swagger/index.html

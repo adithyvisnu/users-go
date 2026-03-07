@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/adithyvisnu/user-go/internal/models",
+	"github.com/adithyvisnu/user-go/internal/models"
 	"github.com/adithyvisnu/user-go/internal/repository"
 )
 

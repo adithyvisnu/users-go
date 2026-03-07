@@ -1,0 +1,310 @@
+basePath: /
+definitions:
+  models.CreateUserRequest:
+    description: Payload to create a new user
+    properties:
+      email:
+        example: alice@example.com
+        type: string
+      name:
+        example: Alice Smith
+        minLength: 2
+        type: string
+      role:
+        enum:
+        - admin
+        - member
+        example: member
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  models.ErrorResponse:
+    description: Standard error response
+    properties:
+      code:
+        example: NOT_FOUND
+        type: string
+      details:
+        example: no user with id ...
+        type: string
+      error:
+        example: user not found
+        type: string
+    type: object
+  models.ListUsersResponse:
+    description: Paginated list of users
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.UserResponse'
+        type: array
+      limit:
+        example: 20
+        type: integer
+      page:
+        example: 1
+        type: integer
+      total:
+        example: 42
+        type: integer
+    type: object
+  models.UpdateUserRequest:
+    description: Payload to update an existing user
+    properties:
+      active:
+        example: true
+        type: boolean
+      name:
+        example: Alice Johnson
+        minLength: 2
+        type: string
+      role:
+        enum:
+        - admin
+        - member
+        example: admin
+        type: string
+    type: object
+  models.UserResponse:
+    description: User object returned by the API
+    properties:
+      active:
+        example: true
+        type: boolean
+      created_at:
+        example: "2024-01-15T10:00:00Z"
+        type: string
+      email:
+        example: alice@example.com
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      name:
+        example: Alice Smith
+        type: string
+      role:
+        example: member
+        type: string
+      tenant_id:
+        example: 660e8400-e29b-41d4-a716-446655440001
+        type: string
+      updated_at:
+        example: "2024-01-15T10:00:00Z"
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: engineering@yourorg.com
+    name: Your Team
+  description: Multi-tenant CRUD API for user management with Redis caching.
+  license:
+    name: MIT
+  title: Users API
+  version: "1.0"
+paths:
+  /v1/users:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of users scoped to the authenticated tenant.
+      parameters:
+      - description: Page number (default 1)
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: Items per page (default 20, max 100)
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ListUsersResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user scoped to the authenticated tenant.
+      parameters:
+      - description: User payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "409":
+          description: Email already in use
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create user
+      tags:
+      - users
+  /v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Soft-deletes a user. The record is retained in the database with
+        a deleted_at timestamp.
+      parameters:
+      - description: User UUID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Returns a single user by UUID, scoped to the authenticated tenant.
+      parameters:
+      - description: User UUID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Applies partial updates to a user. Only provided fields are changed.
+      parameters:
+      - description: User UUID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    description: 'JWT Bearer token. Format: "Bearer <token>"'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
